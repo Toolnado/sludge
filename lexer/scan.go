@@ -86,7 +86,7 @@ func (l *Lexer) scanOperator(ch rune, pos token.Position) token.Token {
 	if typ, ok := operatorsMap[text]; ok {
 		ttype = typ
 	} else {
-		l.addError(fmt.Sprintf("Unexpected character sequence: %s", text))
+		l.addError(fmt.Sprintf("[%d:%d] --> Unexpected character sequence: %s", pos.Line, pos.Column, text))
 	}
 
 	return token.New(pos, ttype, text)
@@ -102,23 +102,31 @@ func (l *Lexer) scanInteger() token.Token {
 	return token.New(l.position(), token.INTEGER, l.text())
 }
 
-// scanString processes string literals and returns a STRING token.
+// scanString processes double-quoted string literals.
+// String interpolation is not supported in double-quoted strings.
 func (l *Lexer) scanString() token.Token {
-	return token.New(l.position(), token.STRING, l.substring())
+	text := l.text()
+	// Remove quotes
+	value := text[1 : len(text)-1]
+	return token.New(l.position(), token.STRING, value)
 }
 
-// scanRawString processes raw strings with support for interpolation (${}) and templates (@{}).
-// Returns the last processed token from the sequence.
+// scanRawString processes raw strings (enclosed in backticks) with support for interpolation.
 func (l *Lexer) scanRawString() token.Token {
 	text := l.text()
 	if !l.hasInterpolation(text) {
-		return token.New(l.position(), token.RAW_STRING, text)
+		// Remove backticks
+		value := text[1 : len(text)-1]
+		return token.New(l.position(), token.RAW_STRING, value)
 	}
 
+	// Process interpolation
 	tokens := l.processInterpolations(text)
-	for _, t := range tokens {
-		l.addToken(t)
+	// Add all tokens except the last one
+	for i := 0; i < len(tokens)-1; i++ {
+		l.addToken(tokens[i])
 	}
+	// Return the last token
 	return tokens[len(tokens)-1]
 }
 
@@ -129,12 +137,6 @@ func (l *Lexer) hasInterpolation(text string) bool {
 }
 
 // processInterpolations breaks down a raw string containing interpolations into a sequence of tokens.
-// It handles both string interpolation (${}) and template (@{}) expressions.
-// The input text should be a raw string including quotes. The function:
-// - Strips the surrounding quotes
-// - Identifies interpolation/template expressions
-// - Creates appropriate tokens for the literal text segments and expressions
-// - Returns the complete sequence of tokens representing the string
 func (l *Lexer) processInterpolations(text string) []token.Token {
 	var tokens []token.Token
 	currentText := text[1 : len(text)-1] // Trim opening and closing quotes
@@ -205,7 +207,6 @@ func (l *Lexer) scanIdentifier() token.Token {
 }
 
 // scan performs scanning of the next token from the input stream.
-// Determines the token type and calls the appropriate handler.
 func (l *Lexer) scan() token.Token {
 	ch := l.advance()
 	pos := l.position()
@@ -219,13 +220,48 @@ func (l *Lexer) scan() token.Token {
 		return l.scanFloat()
 	case scanner.Int:
 		return l.scanInteger()
-	case scanner.String, scanner.Char:
+	case '\'':
+		return l.scanSingleQuotedString()
+	case scanner.String:
 		return l.scanString()
 	case scanner.RawString:
-		return l.scanRawString()
+		t := l.scanRawString()
+		// Не добавляем токен здесь, так как он уже добавлен в scanRawString
+		return t
 	case scanner.Ident:
 		return l.scanIdentifier()
 	default:
+		if ch < 0 {
+			l.addError(fmt.Sprintf("Unexpected character: %v", ch))
+			return token.New(pos, token.ILLEGAL, string(ch))
+		}
 		return l.scanOperator(ch, pos)
 	}
+}
+
+// scanSingleQuotedString processes single-quoted string literals.
+func (l *Lexer) scanSingleQuotedString() token.Token {
+	var builder strings.Builder
+	pos := l.position()
+
+	for !l.isAtEnd() {
+		ch := l.next()
+		if ch == '\'' {
+			break
+		}
+		if ch == '\\' {
+			// Handle escaped characters
+			next := l.next()
+			if next == '\'' {
+				builder.WriteRune('\'')
+			} else {
+				builder.WriteRune('\\')
+				builder.WriteRune(next)
+			}
+		} else {
+			builder.WriteRune(ch)
+		}
+	}
+
+	return token.New(pos, token.STRING, builder.String())
 }

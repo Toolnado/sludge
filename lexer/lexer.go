@@ -2,6 +2,7 @@
 package lexer
 
 import (
+	"fmt"
 	"io"
 	"text/scanner"
 
@@ -22,7 +23,21 @@ type Lexer struct {
 func New(r io.Reader) *Lexer {
 	lexer := &Lexer{}
 	lexer.scanner.Init(r)
-	lexer.scanner.Error = func(s *scanner.Scanner, msg string) {} // Suppress scanner errors
+
+	// Configure scanner mode
+	lexer.scanner.Mode = scanner.ScanIdents |
+		scanner.ScanFloats |
+		scanner.ScanInts |
+		scanner.ScanStrings |
+		scanner.ScanRawStrings |
+		scanner.ScanComments |
+		scanner.SkipComments
+
+	// Configure error handling
+	lexer.scanner.Error = func(s *scanner.Scanner, msg string) {
+		lexer.hadError = true
+		lexer.errors = append(lexer.errors, fmt.Errorf("[%d:%d] --> scanner error: %s", s.Position.Line, s.Position.Column, msg))
+	}
 	return lexer
 }
 
@@ -37,6 +52,15 @@ func (l *Lexer) ScanTokens() []token.Token {
 	for !l.isAtEnd() {
 		t := l.scan()
 		l.addToken(t)
+	}
+
+	// Add EOF token only if it doesn't exist yet
+	if len(l.tokens) == 0 || l.tokens[len(l.tokens)-1].Type != token.EOF {
+		l.addToken(token.Token{
+			Type:     token.EOF,
+			Position: l.position(),
+			Literal:  "",
+		})
 	}
 
 	return l.tokens
