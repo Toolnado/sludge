@@ -1,0 +1,6 @@
+var name = 'John \'No\'';
+var message = "Hello ${name}!";
+var raw = `This is a raw string`;
+var template = `@{formatGreeting(name)}`; 
+var interpol = `${formatGreeting(name)}`; 
+// this is comment
