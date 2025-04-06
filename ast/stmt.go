@@ -3,7 +3,7 @@ package ast
 //go:generate go run ../tools/generator.go
 
 type Expr interface {
-	Accept(IASTVisitor)
+	Accept(IASTVisitor) any
 }
 
 type Stmt interface{ Expr }

@@ -3,34 +3,34 @@ package ast
 import "github.com/Toolnado/sludge/token"
 
 type Binary struct {
-	Left Expr
+	Left     Expr
 	Operator token.Token
-	Right Expr
+	Right    Expr
 }
 
 func NewBinary(Left Expr, Operator token.Token, Right Expr) *Binary {
 	return &Binary{
-		Left: Left,
+		Left:     Left,
 		Operator: Operator,
-		Right: Right,
+		Right:    Right,
 	}
 }
 
-func (b *Binary) Accept(v IASTVisitor) {v.Visit(b)}
+func (b *Binary) Accept(v IASTVisitor) any { return v.VisitBinaryExpr(b) }
 
 type Unary struct {
 	Operator token.Token
-	Right Expr
+	Right    Expr
 }
 
 func NewUnary(Operator token.Token, Right Expr) *Unary {
 	return &Unary{
 		Operator: Operator,
-		Right: Right,
+		Right:    Right,
 	}
 }
 
-func (u *Unary) Accept(v IASTVisitor) {v.Visit(u)}
+func (u *Unary) Accept(v IASTVisitor) any { return v.VisitUnaryExpr(u) }
 
 type Literal struct {
 	Value string
@@ -42,7 +42,7 @@ func NewLiteral(Value string) *Literal {
 	}
 }
 
-func (l *Literal) Accept(v IASTVisitor) {v.Visit(l)}
+func (l *Literal) Accept(v IASTVisitor) any { return v.VisitLiteralExpr(l) }
 
 type Grouping struct {
 	Expession Expr
@@ -54,5 +54,4 @@ func NewGrouping(Expession Expr) *Grouping {
 	}
 }
 
-func (g *Grouping) Accept(v IASTVisitor) {v.Visit(g)}
-
+func (g *Grouping) Accept(v IASTVisitor) any { return v.VisitGroupingExpr(g) }
