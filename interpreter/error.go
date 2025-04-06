@@ -1,19 +1,27 @@
 package interpreter
 
-import "github.com/Toolnado/sludge/ast"
+import (
+	"fmt"
+
+	"github.com/Toolnado/sludge/token"
+)
 
 type InterpreterError struct {
-	expr    []ast.Expr
+	pos     token.Position
 	message string
 }
 
-func NewError(message string, exprs ...ast.Expr) InterpreterError {
+func NewError(message string, pos token.Position) InterpreterError {
 	return InterpreterError{
-		expr:    exprs,
+		pos:     pos,
 		message: message,
 	}
 }
 
 func (t InterpreterError) Error() string {
-	return ""
+	filename := "<input>"
+	if t.pos.Filename != "" {
+		filename = t.pos.Filename
+	}
+	return fmt.Sprintf("%s\n%s:%d:%d", t.message, filename, t.pos.Line, t.pos.Column)
 }

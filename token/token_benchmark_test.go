@@ -11,6 +11,6 @@ func BenchmarkNew(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		New(pos, IDENTIFIER, "test")
+		New(pos, IDENTIFIER, "test", "test")
 	}
 }

@@ -19,7 +19,7 @@ func (a *AstPrinter) Print(expr ast.Expr) {
 }
 
 func (a *AstPrinter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
-	return a.parenthesize(expr.Operator.Literal, expr.Left, expr.Right)
+	return a.parenthesize(expr.Operator.Literal.(string), expr.Left, expr.Right)
 }
 
 func (a *AstPrinter) VisitGroupingExpr(expr *ast.Grouping) (any, error) {
@@ -34,7 +34,7 @@ func (a *AstPrinter) VisitLiteralExpr(expr *ast.Literal) (any, error) {
 }
 
 func (a *AstPrinter) VisitUnaryExpr(expr *ast.Unary) (any, error) {
-	return a.parenthesize(expr.Operator.Literal, expr.Right)
+	return a.parenthesize(expr.Operator.Literal.(string), expr.Right)
 }
 
 func (a *AstPrinter) parenthesize(name string, exprs ...ast.Expr) (string, error) {

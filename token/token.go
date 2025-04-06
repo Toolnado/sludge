@@ -14,7 +14,8 @@ type Position struct {
 type Token struct {
 	Position Position
 	Type     TokenType
-	Literal  string
+	Literal  any
+	Lexeme   string
 }
 
 // New creates a new Token with the given position, type and literal value.
@@ -22,11 +23,13 @@ type Token struct {
 func New(
 	position Position,
 	t TokenType,
-	literal string,
+	lexeme string,
+	literal any,
 ) Token {
 	return Token{
 		Position: position,
 		Type:     t,
+		Lexeme:   lexeme,
 		Literal:  literal,
 	}
 }

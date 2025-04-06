@@ -3,6 +3,7 @@ package lexer
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"text/scanner"
 
@@ -89,35 +90,54 @@ func (l *Lexer) scanOperator(ch rune, pos token.Position) token.Token {
 		l.addError(fmt.Sprintf("[%d:%d] --> Unexpected character sequence: %s", pos.Line, pos.Column, text))
 	}
 
-	return token.New(pos, ttype, text)
+	return l.createToken(ttype)
 }
 
 // scanFloat processes floating-point numbers and returns a FLOAT token.
 func (l *Lexer) scanFloat() token.Token {
-	return token.New(l.position(), token.FLOAT, l.text())
+	return l.createToken(token.FLOAT)
+}
+
+func (l *Lexer) createToken(tpe token.TokenType) token.Token {
+	return token.New(l.position(), tpe, l.text(), l.parseLiteral(tpe, l.text()))
+}
+
+func (l *Lexer) parseLiteral(t token.TokenType, text string) any {
+	switch t {
+	case token.INTEGER:
+		if i, err := strconv.ParseInt(text, 10, 64); err == nil {
+			return i
+		}
+	case token.FLOAT:
+		if f, err := strconv.ParseFloat(text, 64); err == nil {
+			return f
+		}
+	case token.STRING, token.RAW_STRING:
+		unquoted, err := strconv.Unquote(text)
+		if err != nil {
+			return text
+		}
+		return unquoted
+	}
+	return text
 }
 
 // scanInteger processes integer numbers and returns an INTEGER token.
 func (l *Lexer) scanInteger() token.Token {
-	return token.New(l.position(), token.INTEGER, l.text())
+	return l.createToken(token.INTEGER)
 }
 
 // scanString processes double-quoted string literals.
 // String interpolation is not supported in double-quoted strings.
 func (l *Lexer) scanString() token.Token {
-	text := l.text()
-	// Remove quotes
-	value := text[1 : len(text)-1]
-	return token.New(l.position(), token.STRING, value)
+	return l.createToken(token.STRING)
 }
 
 // scanRawString processes raw strings (enclosed in backticks) with support for interpolation.
 func (l *Lexer) scanRawString() token.Token {
 	text := l.text()
 	if !l.hasInterpolation(text) {
-		// Remove backticks
-		value := text[1 : len(text)-1]
-		return token.New(l.position(), token.RAW_STRING, value)
+		return l.createToken(token.RAW_STRING)
 	}
 
 	// Process interpolation
@@ -147,7 +167,7 @@ func (l *Lexer) processInterpolations(text string) []token.Token {
 
 		if interpIndex == -1 && macroIndex == -1 {
 			if currentText != "" {
-				tokens = append(tokens, token.New(l.position(), token.RAW_STRING, currentText))
+				tokens = append(tokens, token.New(l.position(), token.RAW_STRING, currentText, currentText))
 			}
 			break
 		}
@@ -155,7 +175,7 @@ func (l *Lexer) processInterpolations(text string) []token.Token {
 		startIndex, tokenType := l.findNextInterpolation(interpIndex, macroIndex)
 
 		if startIndex > 0 {
-			tokens = append(tokens, token.New(l.position(), token.RAW_STRING, currentText[:startIndex]))
+			tokens = append(tokens, token.New(l.position(), token.RAW_STRING, currentText[:startIndex], currentText[:startIndex]))
 		}
 
 		exprStart := startIndex + 2
@@ -166,7 +186,7 @@ func (l *Lexer) processInterpolations(text string) []token.Token {
 		}
 		exprEnd += exprStart
 
-		tokens = append(tokens, token.New(l.position(), tokenType, currentText[exprStart:exprEnd]))
+		tokens = append(tokens, token.New(l.position(), tokenType, currentText[exprStart:exprEnd], currentText[exprStart:exprEnd]))
 		currentText = currentText[exprEnd+1:]
 	}
 
@@ -203,7 +223,7 @@ func (l *Lexer) scanIdentifier() token.Token {
 	if keyword, isKeyword := token.IsKeyword(l.text()); isKeyword {
 		ttype = keyword
 	}
-	return token.New(l.position(), ttype, l.text())
+	return l.createToken(ttype)
 }
 
 // scan performs scanning of the next token from the input stream.
@@ -212,7 +232,7 @@ func (l *Lexer) scan() token.Token {
 	pos := l.position()
 
 	if ch == scanner.EOF {
-		return token.New(pos, token.EOF, "")
+		return l.createToken(token.EOF)
 	}
 
 	switch ch {
@@ -233,7 +253,7 @@ func (l *Lexer) scan() token.Token {
 	default:
 		if ch < 0 {
 			l.addError(fmt.Sprintf("Unexpected character: %v", ch))
-			return token.New(pos, token.ILLEGAL, string(ch))
+			return token.New(pos, token.ILLEGAL, string(ch), string(ch))
 		}
 		return l.scanOperator(ch, pos)
 	}
@@ -263,5 +283,5 @@ func (l *Lexer) scanSingleQuotedString() token.Token {
 		}
 	}
 
-	return token.New(pos, token.STRING, builder.String())
+	return token.New(pos, token.STRING, builder.String(), builder.String())
 }

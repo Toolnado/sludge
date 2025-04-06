@@ -1,6 +1,7 @@
 package token
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -9,7 +10,8 @@ func TestNew(t *testing.T) {
 		name      string
 		pos       Position
 		tokenType TokenType
-		literal   string
+		lexeme    string
+		literal   interface{}
 		want      Token
 	}{
 		{
@@ -20,31 +22,35 @@ func TestNew(t *testing.T) {
 				Column:   1,
 			},
 			tokenType: IDENTIFIER,
+			lexeme:    "test",
 			literal:   "test",
 			want: Token{
 				Type:     IDENTIFIER,
-				Position: Position{Filename: "test.go", Line: 1, Column: 1},
+				Lexeme:   "test",
 				Literal:  "test",
+				Position: Position{Filename: "test.go", Line: 1, Column: 1},
 			},
 		},
 		{
 			name:      "create token with empty position",
 			pos:       Position{},
 			tokenType: STRING,
+			lexeme:    "\"hello\"",
 			literal:   "hello",
 			want: Token{
 				Type:     STRING,
-				Position: Position{},
+				Lexeme:   "\"hello\"",
 				Literal:  "hello",
+				Position: Position{},
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := New(tt.pos, tt.tokenType, tt.literal)
-			if got != tt.want {
-				t.Errorf("New() = %v, want %v", got, tt.want)
+			got := New(tt.pos, tt.tokenType, tt.lexeme, tt.literal)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("New() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}

@@ -1,6 +1,10 @@
 package parser
 
-import "github.com/Toolnado/sludge/token"
+import (
+	"fmt"
+
+	"github.com/Toolnado/sludge/token"
+)
 
 type TokenError struct {
 	token   token.Token
@@ -15,5 +19,9 @@ func NewError(t token.Token, message string) TokenError {
 }
 
 func (t TokenError) Error() string {
-	return ""
+	filename := "<input>"
+	if t.token.Position.Filename != "" {
+		filename = t.token.Position.Filename
+	}
+	return fmt.Sprintf("%s\n%s:%d:%d", t.message, filename, t.token.Position.Line, t.token.Position.Column)
 }

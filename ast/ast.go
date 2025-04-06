@@ -33,10 +33,10 @@ func NewUnary(Operator token.Token, Right Expr) *Unary {
 func (u *Unary) Accept(v IASTVisitor) (any, error) { return v.VisitUnaryExpr(u) }
 
 type Literal struct {
-	Value string
+	Value any
 }
 
-func NewLiteral(Value string) *Literal {
+func NewLiteral(Value any) *Literal {
 	return &Literal{
 		Value: Value,
 	}
