@@ -14,36 +14,41 @@ func New() *AstPrinter {
 }
 
 func (a *AstPrinter) Print(expr ast.Expr) {
-	fmt.Println(expr.Accept(a).(string))
+	val, _ := expr.Accept(a)
+	fmt.Println(val.(string))
 }
 
-func (a *AstPrinter) VisitBinaryExpr(expr *ast.Binary) any {
+func (a *AstPrinter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
 	return a.parenthesize(expr.Operator.Literal, expr.Left, expr.Right)
 }
 
-func (a *AstPrinter) VisitGroupingExpr(expr *ast.Grouping) any {
+func (a *AstPrinter) VisitGroupingExpr(expr *ast.Grouping) (any, error) {
 	return a.parenthesize("group", expr.Expession)
 }
 
-func (a *AstPrinter) VisitLiteralExpr(expr *ast.Literal) any {
+func (a *AstPrinter) VisitLiteralExpr(expr *ast.Literal) (any, error) {
 	if expr == nil {
-		return "nil"
+		return "nil", nil
 	}
-	return expr.Value
+	return expr.Value, nil
 }
 
-func (a *AstPrinter) VisitUnaryExpr(expr *ast.Unary) any {
+func (a *AstPrinter) VisitUnaryExpr(expr *ast.Unary) (any, error) {
 	return a.parenthesize(expr.Operator.Literal, expr.Right)
 }
 
-func (a *AstPrinter) parenthesize(name string, exprs ...ast.Expr) string {
+func (a *AstPrinter) parenthesize(name string, exprs ...ast.Expr) (string, error) {
 	b := &strings.Builder{}
 	b.WriteString("(")
 	b.WriteString(name)
 	for _, e := range exprs {
 		b.WriteString(" ")
-		b.WriteString(e.Accept(a).(string))
+		val, err := e.Accept(a)
+		if err != nil {
+			return "", err
+		}
+		b.WriteString(val.(string))
 	}
 	b.WriteString(")")
-	return b.String()
+	return b.String(), nil
 }

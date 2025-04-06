@@ -16,7 +16,7 @@ func NewBinary(Left Expr, Operator token.Token, Right Expr) *Binary {
 	}
 }
 
-func (b *Binary) Accept(v IASTVisitor) any { return v.VisitBinaryExpr(b) }
+func (b *Binary) Accept(v IASTVisitor) (any, error) { return v.VisitBinaryExpr(b) }
 
 type Unary struct {
 	Operator token.Token
@@ -30,7 +30,7 @@ func NewUnary(Operator token.Token, Right Expr) *Unary {
 	}
 }
 
-func (u *Unary) Accept(v IASTVisitor) any { return v.VisitUnaryExpr(u) }
+func (u *Unary) Accept(v IASTVisitor) (any, error) { return v.VisitUnaryExpr(u) }
 
 type Literal struct {
 	Value string
@@ -42,7 +42,7 @@ func NewLiteral(Value string) *Literal {
 	}
 }
 
-func (l *Literal) Accept(v IASTVisitor) any { return v.VisitLiteralExpr(l) }
+func (l *Literal) Accept(v IASTVisitor) (any, error) { return v.VisitLiteralExpr(l) }
 
 type Grouping struct {
 	Expession Expr
@@ -54,4 +54,4 @@ func NewGrouping(Expession Expr) *Grouping {
 	}
 }
 
-func (g *Grouping) Accept(v IASTVisitor) any { return v.VisitGroupingExpr(g) }
+func (g *Grouping) Accept(v IASTVisitor) (any, error) { return v.VisitGroupingExpr(g) }
