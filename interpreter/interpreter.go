@@ -1,31 +1,70 @@
 package interpreter
 
 import (
+	"fmt"
+
 	"github.com/Toolnado/sludge/ast"
+	"github.com/Toolnado/sludge/environment"
 	"github.com/Toolnado/sludge/token"
 )
 
 type Interpreter struct {
 	// hadRuntimeError bool
+	environment environment.Environment
 }
 
 func New() *Interpreter {
-	return &Interpreter{}
+	return &Interpreter{
+		environment: environment.New(),
+	}
 }
 
-func (i *Interpreter) Interpret(expr ast.Expr) (any, error) {
-	return i.evaluate(expr)
+func (i *Interpreter) Interpret(stmts []ast.Stmt) (any, error) {
+	for _, stmt := range stmts {
+		_, err := i.execute(stmt)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return nil, nil
 }
 
-func (i *Interpreter) VisitGroupingExpr(expr *ast.Grouping) (any, error) {
-	return i.evaluate(expr)
+func (i *Interpreter) VisitGroupingExpr(expr *ast.GroupingExpr) (any, error) {
+	return i.evaluate(expr.Expession)
 }
 
-func (i *Interpreter) VisitLiteralExpr(expr *ast.Literal) (any, error) {
+func (i *Interpreter) VisitLiteralExpr(expr *ast.LiteralExpr) (any, error) {
 	return expr.Value, nil
 }
 
-func (i *Interpreter) VisitUnaryExpr(expr *ast.Unary) (any, error) {
+func (i *Interpreter) VisitExprStmt(stmt *ast.ExprStmt) (any, error) {
+	return i.evaluate(stmt.Expession)
+}
+
+func (i *Interpreter) VisitPrintStmt(stmt *ast.PrintStmt) (any, error) {
+	value, err := i.evaluate(stmt.Expession)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(value)
+	return nil, nil
+}
+
+func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) { return nil, nil }
+
+func (i *Interpreter) VisitVariableExpr(expr *ast.VariableExpr) (any, error) {
+	return i.environment.Get(expr.Name)
+}
+func (i *Interpreter) VisitVarStmt(stmt *ast.VarStmt) (any, error) {
+	var value any
+	if stmt.Initializer != nil {
+		value, _ = i.evaluate(stmt.Initializer)
+	}
+	i.environment.Define(stmt.Name.Lexeme, value)
+	return nil, nil
+}
+
+func (i *Interpreter) VisitUnaryExpr(expr *ast.UnaryExpr) (any, error) {
 	right, err := i.evaluate(expr.Right)
 	if err != nil {
 		return nil, NewError(err.Error(), expr.Operator.Position)
@@ -45,7 +84,7 @@ func (i *Interpreter) VisitUnaryExpr(expr *ast.Unary) (any, error) {
 	}
 }
 
-func (i *Interpreter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
+func (i *Interpreter) VisitBinaryExpr(expr *ast.BinaryExpr) (any, error) {
 	left, err := i.evaluate(expr.Left)
 	if err != nil {
 		return nil, NewError(err.Error(), expr.Operator.Position)
@@ -82,8 +121,4 @@ func (i *Interpreter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
 	default:
 		return nil, NewError("unsupported binary operator", expr.Operator.Position)
 	}
-}
-
-func (i *Interpreter) evaluate(expr ast.Expr) (any, error) {
-	return expr.Accept(i)
 }

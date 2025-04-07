@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Toolnado/sludge/ast"
 	"github.com/Toolnado/sludge/token"
 )
 
@@ -173,4 +174,12 @@ func (i *Interpreter) add(left, right any, op token.Token) (any, error) {
 	default:
 		return nil, errors.New("unsupported operand types for '+'")
 	}
+}
+
+func (i *Interpreter) evaluate(expr ast.Expr) (any, error) {
+	return expr.Accept(i)
+}
+
+func (i *Interpreter) execute(stmt ast.Stmt) (any, error) {
+	return stmt.Accept(i)
 }

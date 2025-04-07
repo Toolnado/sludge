@@ -18,22 +18,32 @@ func (a *AstPrinter) Print(expr ast.Expr) {
 	fmt.Println(val.(string))
 }
 
-func (a *AstPrinter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
+func (a *AstPrinter) VisitBinaryExpr(expr *ast.BinaryExpr) (any, error) {
 	return a.parenthesize(expr.Operator.Literal.(string), expr.Left, expr.Right)
 }
 
-func (a *AstPrinter) VisitGroupingExpr(expr *ast.Grouping) (any, error) {
+func (a *AstPrinter) VisitGroupingExpr(expr *ast.GroupingExpr) (any, error) {
 	return a.parenthesize("group", expr.Expession)
 }
 
-func (a *AstPrinter) VisitLiteralExpr(expr *ast.Literal) (any, error) {
+func (a *AstPrinter) VisitExprStmt(stmt *ast.ExprStmt) (any, error) {
+	a.parenthesize("exprStmt", stmt.Expession)
+	return nil, nil
+}
+
+func (a *AstPrinter) VisitPrintStmt(stmt *ast.PrintStmt) (any, error) {
+	a.parenthesize("printStmt", stmt.Expession)
+	return nil, nil
+}
+
+func (a *AstPrinter) VisitLiteralExpr(expr *ast.LiteralExpr) (any, error) {
 	if expr == nil {
 		return "nil", nil
 	}
 	return expr.Value, nil
 }
 
-func (a *AstPrinter) VisitUnaryExpr(expr *ast.Unary) (any, error) {
+func (a *AstPrinter) VisitUnaryExpr(expr *ast.UnaryExpr) (any, error) {
 	return a.parenthesize(expr.Operator.Literal.(string), expr.Right)
 }
 
@@ -52,3 +62,7 @@ func (a *AstPrinter) parenthesize(name string, exprs ...ast.Expr) (string, error
 	b.WriteString(")")
 	return b.String(), nil
 }
+
+func (a *AstPrinter) VisitVariableExpr(expr *ast.VariableExpr) (any, error) { return nil, nil }
+func (a *AstPrinter) VisitVarStmt(expr *ast.VarStmt) (any, error)           { return nil, nil }
+func (a *AstPrinter) VisitAssignExpr(expr *ast.AssignExpr) (any, error)     { return nil, nil }
