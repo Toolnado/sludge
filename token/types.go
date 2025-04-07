@@ -67,6 +67,7 @@ const (
 	CONTINUE TokenType = "CONTINUE" // CONTINUE represents the "continue" statement keyword
 	NULL     TokenType = "NULL"     // NULL represents the "null" literal
 	IMPORT   TokenType = "IMPORT"   // IMPORT represents the "import" keyword
+	PRINT    TokenType = "PRINT"
 
 	EOF TokenType = "EOF" // EOF represents the end of file token
 )

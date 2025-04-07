@@ -18,6 +18,7 @@ var Keywords = map[string]TokenType{
 	"continue": CONTINUE,
 	"null":     NULL,
 	"import":   IMPORT,
+	"print":    PRINT,
 }
 
 // IsKeyword checks if a given string is a keyword in the language.

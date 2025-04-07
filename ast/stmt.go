@@ -1,28 +1,42 @@
 package ast
 
-//go:generate go run ../tools/generator.go
+import "github.com/Toolnado/sludge/token"
 
-type Expr interface {
-	Accept(IASTVisitor) (any, error)
+type PrintStmt struct {
+	Expession Expr
 }
 
-type Stmt interface{ Expr }
+func NewPrintStmt(Expession Expr) *PrintStmt {
+	return &PrintStmt{
+		Expession: Expession,
+	}
+}
 
-// expression     → literal
-//                | unary
-//                | binary
-//                | grouping ;
+func (p *PrintStmt) Accept(v IASTVisitor) (any, error) { return v.VisitPrintStmt(p)}
 
-// literal        → NUMBER | STRING | "true" | "false" | "nil" ;
-// grouping       → "(" expression ")" ;
-// unary          → ( "-" | "!" ) expression | expression ("++" | "--");
-// binary         → expression operator expression ;
-// operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
-//                | "+"  | "-"  | "*" | "/" | "**" | "%" ;
+type ExprStmt struct {
+	Expession Expr
+}
 
-// Name		Operators		Associates
-// Equality		== !=		Left
-// Comparison	> >= < <=	Left
-// Term			- +			Left
-// Factor		/ * %		Left
-// Unary		! -			Right
+func NewExprStmt(Expession Expr) *ExprStmt {
+	return &ExprStmt{
+		Expession: Expession,
+	}
+}
+
+func (e *ExprStmt) Accept(v IASTVisitor) (any, error) { return v.VisitExprStmt(e)}
+
+type VarStmt struct {
+	Name token.Token
+	Initializer Expr
+}
+
+func NewVarStmt(Name token.Token, Initializer Expr) *VarStmt {
+	return &VarStmt{
+		Name: Name,
+		Initializer: Initializer,
+	}
+}
+
+func (va *VarStmt) Accept(v IASTVisitor) (any, error) { return v.VisitVarStmt(va)}
+
