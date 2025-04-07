@@ -12,8 +12,8 @@ func main() {
 	generateDefaultAST()
 }
 
-func generateAST(exprs map[string][]string) {
-	f, err := os.Create("ast.go")
+func generateAST(file string, exprs map[string][]string) {
+	f, err := os.Create(file)
 	if err != nil {
 		log.Println("GenerageAST error:", err)
 		return
@@ -38,8 +38,12 @@ func generateAST(exprs map[string][]string) {
 }
 
 func generateVisitor(expr string, f io.Writer) {
-	r := strings.ToLower(expr)[0]
-	fmt.Fprintf(f, "func (%c *%s) Accept(v IASTVisitor) {v.Visit(%c)}\n\n", r, expr, r)
+	r := string(strings.ToLower(expr)[0])
+	if r == "v" {
+		r += string(strings.ToLower(expr)[1])
+	}
+
+	fmt.Fprintf(f, "func (%s *%s) Accept(v IASTVisitor) (any, error) { return v.Visit%s(%s)}\n\n", r, expr, expr, r)
 }
 
 func generateConstructor(expr string, fields []string, f io.Writer) {
@@ -70,21 +74,31 @@ func generateConstructor(expr string, fields []string, f io.Writer) {
 }
 
 func generateDefaultAST() {
-	generateAST(map[string][]string{
-		"Binary": {
+	generateAST("expr.go", map[string][]string{
+		"BinaryExpr": {
 			"Left Expr",
 			"Operator token.Token",
 			"Right Expr",
 		},
-		"Unary": {
+		"UnaryExpr": {
 			"Operator token.Token",
 			"Right Expr",
 		},
-		"Literal": {
-			"Value string",
+		"LiteralExpr":  {"Value any"},
+		"GroupingExpr": {"Expession Expr"},
+		"VariableExpr": {"Name token.Token"},
+		"AssignExpr": {
+			"Name token.Token",
+			"Value Expr",
 		},
-		"Grouping": {
-			"Expession Expr",
+	})
+
+	generateAST("stmt.go", map[string][]string{
+		"PrintStmt": {"Expession Expr"},
+		"ExprStmt":  {"Expession Expr"},
+		"VarStmt": {
+			"Name token.Token",
+			"Initializer Expr",
 		},
 	})
 }
