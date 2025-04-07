@@ -50,7 +50,14 @@ func (i *Interpreter) VisitPrintStmt(stmt *ast.PrintStmt) (any, error) {
 	return nil, nil
 }
 
-func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) { return nil, nil }
+func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
+	value, err := expr.Value.Accept(i)
+	if err != nil {
+		return nil, NewError(err.Error(), expr.Name.Position)
+	}
+	i.environment.Define(expr.Name.Lexeme, value)
+	return nil, nil
+}
 
 func (i *Interpreter) VisitVariableExpr(expr *ast.VariableExpr) (any, error) {
 	return i.environment.Get(expr.Name)

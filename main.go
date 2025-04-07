@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -10,19 +11,21 @@ import (
 )
 
 func main() {
-	l := lexer.New(strings.NewReader("2+3*10/8-2-4+\"5\""))
+	l := lexer.New(strings.NewReader(`
+	var a = "Hello";
+	a = "World";
+	print a;
+	`))
 	t := l.ScanTokens()
 	p := parser.New(t)
-	expr, err := p.Parse()
+	stmts, err := p.Parse()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	i := interpreter.New()
-	v, err := i.Interpret(expr)
+	_, err = i.Interpret(stmts)
 	if err != nil {
-		log.Println(err)
-		return
+		fmt.Println(err)
 	}
-	log.Println("result:", v)
 }
