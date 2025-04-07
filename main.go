@@ -13,7 +13,7 @@ import (
 func main() {
 	l := lexer.New(strings.NewReader(`
 	var a = "Hello";
-	a = "World";
+	b = a + " World";
 	print a;
 	`))
 	t := l.ScanTokens()

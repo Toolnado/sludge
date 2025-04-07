@@ -51,11 +51,14 @@ func (i *Interpreter) VisitPrintStmt(stmt *ast.PrintStmt) (any, error) {
 }
 
 func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
-	value, err := expr.Value.Accept(i)
+	value, err := i.evaluate(expr.Value)
 	if err != nil {
 		return nil, NewError(err.Error(), expr.Name.Position)
 	}
-	i.environment.Define(expr.Name.Lexeme, value)
+	_, err = i.environment.Assign(expr.Name, value)
+	if err != nil {
+		return nil, NewError(err.Error(), expr.Name.Position)
+	}
 	return nil, nil
 }
 

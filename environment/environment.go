@@ -27,3 +27,12 @@ func (e *Environment) Get(name token.Token) (any, error) {
 	}
 	return nil, fmt.Errorf("undefined variable '%s'", name.Lexeme)
 }
+
+func (e *Environment) Assign(name token.Token, value any) (any, error) {
+	_, ok := e.values[name.Lexeme]
+	if ok {
+		e.values[name.Lexeme] = value
+		return nil, nil
+	}
+	return nil, fmt.Errorf("undefined variable '%s'", name.Lexeme)
+}
