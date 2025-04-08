@@ -2,6 +2,18 @@ package ast
 
 import "github.com/Toolnado/sludge/token"
 
+type BlockStmt struct {
+	Statements []Stmt
+}
+
+func NewBlockStmt(Statements []Stmt) *BlockStmt {
+	return &BlockStmt{
+		Statements: Statements,
+	}
+}
+
+func (b *BlockStmt) Accept(v IASTVisitor) (any, error) { return v.VisitBlockStmt(b) }
+
 type PrintStmt struct {
 	Expession Expr
 }
@@ -12,7 +24,7 @@ func NewPrintStmt(Expession Expr) *PrintStmt {
 	}
 }
 
-func (p *PrintStmt) Accept(v IASTVisitor) (any, error) { return v.VisitPrintStmt(p)}
+func (p *PrintStmt) Accept(v IASTVisitor) (any, error) { return v.VisitPrintStmt(p) }
 
 type ExprStmt struct {
 	Expession Expr
@@ -24,19 +36,18 @@ func NewExprStmt(Expession Expr) *ExprStmt {
 	}
 }
 
-func (e *ExprStmt) Accept(v IASTVisitor) (any, error) { return v.VisitExprStmt(e)}
+func (e *ExprStmt) Accept(v IASTVisitor) (any, error) { return v.VisitExprStmt(e) }
 
 type VarStmt struct {
-	Name token.Token
+	Name        token.Token
 	Initializer Expr
 }
 
 func NewVarStmt(Name token.Token, Initializer Expr) *VarStmt {
 	return &VarStmt{
-		Name: Name,
+		Name:        Name,
 		Initializer: Initializer,
 	}
 }
 
-func (va *VarStmt) Accept(v IASTVisitor) (any, error) { return v.VisitVarStmt(va)}
-
+func (va *VarStmt) Accept(v IASTVisitor) (any, error) { return v.VisitVarStmt(va) }

@@ -14,6 +14,8 @@ import (
 //                | statement ;
 // statement      → exprStmt
 //                | printStmt ;
+//				  | block ;
+// block          → "{" declaration* "}" ;
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment
 //                | equality ;
@@ -105,7 +107,7 @@ func (p *Parser) expressionStatement() (ast.Stmt, error) {
 	if err != nil {
 		return nil, NewError(p.previous(), err.Error())
 	}
-	p.consume(token.SEMICOLON, "expect ';' after value.")
+	p.consume(token.SEMICOLON, "expect ';' after value")
 	return ast.NewExprStmt(value), nil
 }
 
@@ -251,6 +253,23 @@ func (p *Parser) unary() (ast.Expr, error) {
 	return p.primary()
 }
 
+func (p *Parser) block() ([]ast.Stmt, error) {
+	statements := []ast.Stmt{}
+	for !p.check(token.RIGHT_BRACE) && !p.isAtEnd() {
+		stmt, err := p.declaration()
+		if err != nil {
+			return nil, err
+		}
+		statements = append(statements, stmt)
+	}
+
+	_, err := p.consume(token.RIGHT_BRACE, "expect '}' after block.")
+	if err != nil {
+		return nil, err
+	}
+	return statements, nil
+}
+
 // primary → literal | "(" expression ")" ;
 func (p *Parser) primary() (ast.Expr, error) {
 	switch {
@@ -265,6 +284,12 @@ func (p *Parser) primary() (ast.Expr, error) {
 
 	case p.match(token.IDENTIFIER):
 		return ast.NewVariableExpr(p.previous()), nil
+	case p.match(token.LEFT_BRACE):
+		stmts, err := p.block()
+		if err != nil {
+			return nil, err
+		}
+		return ast.NewBlockStmt(stmts), nil
 	case p.match(token.LEFT_PAREN):
 		expr, err := p.expression()
 		if err != nil {

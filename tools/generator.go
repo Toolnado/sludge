@@ -100,5 +100,6 @@ func generateDefaultAST() {
 			"Name token.Token",
 			"Initializer Expr",
 		},
+		"BlockStmt": {"Statements []Stmt"},
 	})
 }

@@ -10,12 +10,12 @@ import (
 
 type Interpreter struct {
 	// hadRuntimeError bool
-	environment environment.Environment
+	environment *environment.Environment
 }
 
 func New() *Interpreter {
 	return &Interpreter{
-		environment: environment.New(),
+		environment: environment.New(nil),
 	}
 }
 
@@ -47,6 +47,26 @@ func (i *Interpreter) VisitPrintStmt(stmt *ast.PrintStmt) (any, error) {
 		return nil, err
 	}
 	fmt.Println(value)
+	return nil, nil
+}
+
+func (i *Interpreter) VisitBlockStmt(stmt *ast.BlockStmt) (any, error) {
+	return i.excecuteBlock(stmt.Statements, environment.New(i.environment))
+}
+
+func (i *Interpreter) excecuteBlock(stmts []ast.Stmt, env *environment.Environment) (any, error) {
+	previous := i.environment
+	defer func() {
+		i.environment = previous
+	}()
+
+	i.environment = env
+	for _, stmt := range stmts {
+		_, err := i.execute(stmt)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return nil, nil
 }
 

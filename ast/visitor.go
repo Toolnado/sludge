@@ -14,7 +14,8 @@ type IExprVisitor interface {
 }
 
 type IStmtVisitor interface {
-	VisitPrintStmt(expr *PrintStmt) (any, error)
-	VisitExprStmt(expr *ExprStmt) (any, error)
-	VisitVarStmt(expr *VarStmt) (any, error)
+	VisitPrintStmt(stmt *PrintStmt) (any, error)
+	VisitExprStmt(stmt *ExprStmt) (any, error)
+	VisitVarStmt(stmt *VarStmt) (any, error)
+	VisitBlockStmt(stmt *BlockStmt) (any, error)
 }
