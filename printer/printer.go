@@ -66,5 +66,6 @@ func (a *AstPrinter) parenthesize(name string, exprs ...ast.Expr) (string, error
 func (a *AstPrinter) VisitVariableExpr(expr *ast.VariableExpr) (any, error) { return nil, nil }
 func (a *AstPrinter) VisitVarStmt(expr *ast.VarStmt) (any, error)           { return nil, nil }
 func (a *AstPrinter) VisitAssignExpr(expr *ast.AssignExpr) (any, error)     { return nil, nil }
+func (a *AstPrinter) VisitLogicalExpr(expr *ast.LogicalExpr) (any, error)   { return nil, nil }
 func (a *AstPrinter) VisitBlockStmt(stmt *ast.BlockStmt) (any, error)       { return nil, nil }
 func (a *AstPrinter) VisitIfStmt(stmt *ast.IfStmt) (any, error)             { return nil, nil }

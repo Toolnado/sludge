@@ -12,11 +12,10 @@ import (
 
 func main() {
 	l := lexer.New(strings.NewReader(`
-		var a = 1
-		if (a == 1){
-			a = 10 
-			print a
-		}
+		print null || "hi"
+		print "hi" || null
+		print "hi" && null
+		print null && "hi"
 	`))
 	t := l.ScanTokens()
 	p := parser.New(t)

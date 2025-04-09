@@ -112,6 +112,8 @@ func (l *Lexer) parseLiteral(t token.TokenType, text string) any {
 		if f, err := strconv.ParseFloat(text, 64); err == nil {
 			return f
 		}
+	case token.NULL:
+		return nil
 	case token.STRING, token.RAW_STRING:
 		unquoted, err := strconv.Unquote(text)
 		if err != nil {

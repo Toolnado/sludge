@@ -2,6 +2,30 @@ package ast
 
 import "github.com/Toolnado/sludge/token"
 
+type PrintStmt struct {
+	Expession Expr
+}
+
+func NewPrintStmt(Expession Expr) *PrintStmt {
+	return &PrintStmt{
+		Expession: Expession,
+	}
+}
+
+func (p *PrintStmt) Accept(v IASTVisitor) (any, error) { return v.VisitPrintStmt(p)}
+
+type ExprStmt struct {
+	Expession Expr
+}
+
+func NewExprStmt(Expession Expr) *ExprStmt {
+	return &ExprStmt{
+		Expession: Expession,
+	}
+}
+
+func (e *ExprStmt) Accept(v IASTVisitor) (any, error) { return v.VisitExprStmt(e)}
+
 type VarStmt struct {
 	Name token.Token
 	Initializer Expr
@@ -43,28 +67,4 @@ func NewIfStmt(Condition Expr, ThenBranch Stmt, ElseBranch Stmt) *IfStmt {
 }
 
 func (i *IfStmt) Accept(v IASTVisitor) (any, error) { return v.VisitIfStmt(i)}
-
-type PrintStmt struct {
-	Expession Expr
-}
-
-func NewPrintStmt(Expession Expr) *PrintStmt {
-	return &PrintStmt{
-		Expession: Expession,
-	}
-}
-
-func (p *PrintStmt) Accept(v IASTVisitor) (any, error) { return v.VisitPrintStmt(p)}
-
-type ExprStmt struct {
-	Expession Expr
-}
-
-func NewExprStmt(Expession Expr) *ExprStmt {
-	return &ExprStmt{
-		Expession: Expession,
-	}
-}
-
-func (e *ExprStmt) Accept(v IASTVisitor) (any, error) { return v.VisitExprStmt(e)}
 

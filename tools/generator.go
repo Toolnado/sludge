@@ -91,6 +91,11 @@ func generateDefaultAST() {
 			"Name token.Token",
 			"Value Expr",
 		},
+		"LogicalExpr": {
+			"Left Expr",
+			"Operator token.Token",
+			"Right Expr",
+		},
 	})
 
 	generateAST("stmt.go", map[string][]string{

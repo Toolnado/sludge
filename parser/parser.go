@@ -21,7 +21,9 @@ import (
 // block          → "{" declaration* "}" ;
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment
-//                | equality ;
+//                | logic_or ;
+// logic_or       → logic_and ( "or" logic_and )* ;
+// logic_and      → equality ( "and" equality )* ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 // term           → remainder ( ( "-" | "+" ) remainder )* ;
@@ -131,13 +133,13 @@ func (p *Parser) synchronize() {
 	}
 }
 
-// expression → equality ;
+// expression → or;
 func (p *Parser) expression() (ast.Expr, error) {
 	return p.assignment()
 }
 
 func (p *Parser) assignment() (ast.Expr, error) {
-	expr, err := p.equality()
+	expr, err := p.or()
 	if err != nil {
 		return nil, NewError(p.peek(), err.Error())
 	}
@@ -153,6 +155,40 @@ func (p *Parser) assignment() (ast.Expr, error) {
 		}
 
 		return nil, NewError(equals, "invalid assignment target")
+	}
+
+	return expr, nil
+}
+
+func (p *Parser) or() (ast.Expr, error) {
+	expr, err := p.and()
+	if err != nil {
+		return nil, NewError(p.peek(), err.Error())
+	}
+	if p.match(token.OR) {
+		operator := p.previous()
+		right, err := p.and()
+		if err != nil {
+			return nil, NewError(p.peek(), err.Error())
+		}
+		return ast.NewLogicalExpr(expr, operator, right), nil
+	}
+
+	return expr, nil
+}
+
+func (p *Parser) and() (ast.Expr, error) {
+	expr, err := p.equality()
+	if err != nil {
+		return nil, NewError(p.peek(), err.Error())
+	}
+	if p.match(token.AND) {
+		operator := p.previous()
+		right, err := p.equality()
+		if err != nil {
+			return nil, NewError(p.peek(), err.Error())
+		}
+		return ast.NewLogicalExpr(expr, operator, right), nil
 	}
 
 	return expr, nil
@@ -310,7 +346,7 @@ func (p *Parser) primary() (ast.Expr, error) {
 	case p.match(token.TRUE):
 		return ast.NewLiteralExpr(p.previous().Literal), nil
 	case p.match(token.NULL):
-		return ast.NewLiteralExpr("null"), nil
+		return ast.NewLiteralExpr(nil), nil
 	case p.match(token.STRING, token.RAW_STRING, token.INTEGER):
 		return ast.NewLiteralExpr(p.previous().Literal), nil
 

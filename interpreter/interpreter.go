@@ -166,3 +166,22 @@ func (i *Interpreter) VisitBinaryExpr(expr *ast.BinaryExpr) (any, error) {
 		return nil, NewError("unsupported binary operator", expr.Operator.Position)
 	}
 }
+
+func (i *Interpreter) VisitLogicalExpr(expr *ast.LogicalExpr) (any, error) {
+	left, err := i.evaluate(expr.Left)
+	if err != nil {
+		return nil, err
+	}
+
+	if expr.Operator.Type == token.OR {
+		if i.isTruthy(left) {
+			return left, nil
+		}
+	} else {
+		if !i.isTruthy(left) {
+			return left, nil
+		}
+	}
+
+	return i.evaluate(expr.Right)
+}

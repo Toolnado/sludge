@@ -11,6 +11,7 @@ type IExprVisitor interface {
 	VisitUnaryExpr(expr *UnaryExpr) (any, error)
 	VisitVariableExpr(expr *VariableExpr) (any, error)
 	VisitAssignExpr(expr *AssignExpr) (any, error)
+	VisitLogicalExpr(expr *LogicalExpr) (any, error)
 }
 
 type IStmtVisitor interface {
