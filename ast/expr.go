@@ -2,35 +2,61 @@ package ast
 
 import "github.com/Toolnado/sludge/token"
 
+type VariableExpr struct {
+	Name token.Token
+}
+
+func NewVariableExpr(Name token.Token) *VariableExpr {
+	return &VariableExpr{
+		Name: Name,
+	}
+}
+
+func (va *VariableExpr) Accept(v IASTVisitor) (any, error) { return v.VisitVariableExpr(va)}
+
+type AssignExpr struct {
+	Name token.Token
+	Value Expr
+}
+
+func NewAssignExpr(Name token.Token, Value Expr) *AssignExpr {
+	return &AssignExpr{
+		Name: Name,
+		Value: Value,
+	}
+}
+
+func (a *AssignExpr) Accept(v IASTVisitor) (any, error) { return v.VisitAssignExpr(a)}
+
 type BinaryExpr struct {
-	Left     Expr
+	Left Expr
 	Operator token.Token
-	Right    Expr
+	Right Expr
 }
 
 func NewBinaryExpr(Left Expr, Operator token.Token, Right Expr) *BinaryExpr {
 	return &BinaryExpr{
-		Left:     Left,
+		Left: Left,
 		Operator: Operator,
-		Right:    Right,
+		Right: Right,
 	}
 }
 
-func (b *BinaryExpr) Accept(v IASTVisitor) (any, error) { return v.VisitBinaryExpr(b) }
+func (b *BinaryExpr) Accept(v IASTVisitor) (any, error) { return v.VisitBinaryExpr(b)}
 
 type UnaryExpr struct {
 	Operator token.Token
-	Right    Expr
+	Right Expr
 }
 
 func NewUnaryExpr(Operator token.Token, Right Expr) *UnaryExpr {
 	return &UnaryExpr{
 		Operator: Operator,
-		Right:    Right,
+		Right: Right,
 	}
 }
 
-func (u *UnaryExpr) Accept(v IASTVisitor) (any, error) { return v.VisitUnaryExpr(u) }
+func (u *UnaryExpr) Accept(v IASTVisitor) (any, error) { return v.VisitUnaryExpr(u)}
 
 type LiteralExpr struct {
 	Value any
@@ -42,7 +68,7 @@ func NewLiteralExpr(Value any) *LiteralExpr {
 	}
 }
 
-func (l *LiteralExpr) Accept(v IASTVisitor) (any, error) { return v.VisitLiteralExpr(l) }
+func (l *LiteralExpr) Accept(v IASTVisitor) (any, error) { return v.VisitLiteralExpr(l)}
 
 type GroupingExpr struct {
 	Expession Expr
@@ -54,30 +80,5 @@ func NewGroupingExpr(Expession Expr) *GroupingExpr {
 	}
 }
 
-func (g *GroupingExpr) Accept(v IASTVisitor) (any, error) { return v.VisitGroupingExpr(g) }
+func (g *GroupingExpr) Accept(v IASTVisitor) (any, error) { return v.VisitGroupingExpr(g)}
 
-type VariableExpr struct {
-	Name token.Token
-}
-
-func NewVariableExpr(Name token.Token) *VariableExpr {
-	return &VariableExpr{
-		Name: Name,
-	}
-}
-
-func (va *VariableExpr) Accept(v IASTVisitor) (any, error) { return v.VisitVariableExpr(va) }
-
-type AssignExpr struct {
-	Name  token.Token
-	Value Expr
-}
-
-func NewAssignExpr(Name token.Token, Value Expr) *AssignExpr {
-	return &AssignExpr{
-		Name:  Name,
-		Value: Value,
-	}
-}
-
-func (a *AssignExpr) Accept(v IASTVisitor) (any, error) { return v.VisitAssignExpr(a) }

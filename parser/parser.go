@@ -12,9 +12,12 @@ import (
 // program        → declaration* EOF ;
 // declaration    → varDecl
 //                | statement ;
-// statement      → exprStmt
+// statement      → exprStmt ;
+// 				  | ifStmt ;
 //                | printStmt ;
 //				  | block ;
+// ifStmt         → "if" "(" expression ")" statement
+//                ( "else" statement )? ;
 // block          → "{" declaration* "}" ;
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment
@@ -270,6 +273,35 @@ func (p *Parser) block() ([]ast.Stmt, error) {
 	return statements, nil
 }
 
+func (p *Parser) ifStatement() (ast.Stmt, error) {
+	_, err := p.consume(token.LEFT_PAREN, "expect '(' after 'if'.")
+	if err != nil {
+		return nil, err
+	}
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	_, err = p.consume(token.RIGHT_PAREN, "expect ')' after if condition.")
+	if err != nil {
+		return nil, err
+	}
+
+	thenBranch, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+	var elseBranch ast.Stmt
+	if p.match(token.ELSE) {
+		stmt, err := p.statement()
+		if err != nil {
+			return nil, err
+		}
+		elseBranch = stmt
+	}
+	return ast.NewIfStmt(condition, thenBranch, elseBranch), nil
+}
+
 // primary → literal | "(" expression ")" ;
 func (p *Parser) primary() (ast.Expr, error) {
 	switch {
@@ -299,6 +331,8 @@ func (p *Parser) primary() (ast.Expr, error) {
 			return nil, err
 		}
 		return ast.NewGroupingExpr(expr), nil
+	case p.match(token.IF):
+		return p.ifStatement()
 	default:
 		return nil, NewError(p.peek(), "expect expression")
 	}

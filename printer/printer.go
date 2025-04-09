@@ -67,3 +67,4 @@ func (a *AstPrinter) VisitVariableExpr(expr *ast.VariableExpr) (any, error) { re
 func (a *AstPrinter) VisitVarStmt(expr *ast.VarStmt) (any, error)           { return nil, nil }
 func (a *AstPrinter) VisitAssignExpr(expr *ast.AssignExpr) (any, error)     { return nil, nil }
 func (a *AstPrinter) VisitBlockStmt(stmt *ast.BlockStmt) (any, error)       { return nil, nil }
+func (a *AstPrinter) VisitIfStmt(stmt *ast.IfStmt) (any, error)             { return nil, nil }

@@ -101,5 +101,10 @@ func generateDefaultAST() {
 			"Initializer Expr",
 		},
 		"BlockStmt": {"Statements []Stmt"},
+		"IfStmt": {
+			"Condition Expr",
+			"ThenBranch Stmt",
+			"ElseBranch Stmt",
+		},
 	})
 }

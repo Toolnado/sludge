@@ -85,6 +85,7 @@ func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
 func (i *Interpreter) VisitVariableExpr(expr *ast.VariableExpr) (any, error) {
 	return i.environment.Get(expr.Name)
 }
+
 func (i *Interpreter) VisitVarStmt(stmt *ast.VarStmt) (any, error) {
 	var value any
 	if stmt.Initializer != nil {
@@ -92,6 +93,19 @@ func (i *Interpreter) VisitVarStmt(stmt *ast.VarStmt) (any, error) {
 	}
 	i.environment.Define(stmt.Name.Lexeme, value)
 	return nil, nil
+}
+
+func (i *Interpreter) VisitIfStmt(stmt *ast.IfStmt) (any, error) {
+	condition, err := i.evaluate(stmt.Condition)
+	if err != nil {
+		return nil, err
+	}
+	if i.isTruthy(condition) {
+		_, err = i.execute(stmt.ThenBranch)
+	} else if stmt.ElseBranch != nil {
+		_, err = i.execute(stmt.ElseBranch)
+	}
+	return nil, err
 }
 
 func (i *Interpreter) VisitUnaryExpr(expr *ast.UnaryExpr) (any, error) {
