@@ -111,5 +111,9 @@ func generateDefaultAST() {
 			"ThenBranch Stmt",
 			"ElseBranch Stmt",
 		},
+		"WhileStmt": {
+			"Condition Expr",
+			"Body Stmt",
+		},
 	})
 }

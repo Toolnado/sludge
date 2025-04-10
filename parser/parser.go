@@ -12,16 +12,22 @@ import (
 // program        → declaration* EOF ;
 // declaration    → varDecl
 //                | statement ;
+
 // statement      → exprStmt ;
 // 				  | ifStmt ;
 //                | printStmt ;
+// 				  | whileStmt ;
 //				  | block ;
+
+// whileStmt      → "while" "(" expression ")" statement ;
 // ifStmt         → "if" "(" expression ")" statement
 //                ( "else" statement )? ;
 // block          → "{" declaration* "}" ;
+
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment
 //                | logic_or ;
+
 // logic_or       → logic_and ( "or" logic_and )* ;
 // logic_and      → equality ( "and" equality )* ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -310,7 +316,7 @@ func (p *Parser) block() ([]ast.Stmt, error) {
 }
 
 func (p *Parser) ifStatement() (ast.Stmt, error) {
-	_, err := p.consume(token.LEFT_PAREN, "expect '(' after 'if'.")
+	_, err := p.consume(token.LEFT_PAREN, "expect '(' after 'if'")
 	if err != nil {
 		return nil, err
 	}
@@ -318,7 +324,7 @@ func (p *Parser) ifStatement() (ast.Stmt, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = p.consume(token.RIGHT_PAREN, "expect ')' after if condition.")
+	_, err = p.consume(token.RIGHT_PAREN, "expect ')' after if condition")
 	if err != nil {
 		return nil, err
 	}
@@ -338,6 +344,21 @@ func (p *Parser) ifStatement() (ast.Stmt, error) {
 	return ast.NewIfStmt(condition, thenBranch, elseBranch), nil
 }
 
+func (p *Parser) whileStatement() (ast.Stmt, error) {
+	p.consume(token.LEFT_PAREN, "expect '(' after 'while'")
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	p.consume(token.RIGHT_PAREN, "expect ')' after condition")
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	return ast.NewWhileStmt(condition, body), nil
+}
+
 // primary → literal | "(" expression ")" ;
 func (p *Parser) primary() (ast.Expr, error) {
 	switch {
@@ -349,7 +370,6 @@ func (p *Parser) primary() (ast.Expr, error) {
 		return ast.NewLiteralExpr(nil), nil
 	case p.match(token.STRING, token.RAW_STRING, token.INTEGER):
 		return ast.NewLiteralExpr(p.previous().Literal), nil
-
 	case p.match(token.IDENTIFIER):
 		return ast.NewVariableExpr(p.previous()), nil
 	case p.match(token.LEFT_BRACE):
@@ -367,6 +387,8 @@ func (p *Parser) primary() (ast.Expr, error) {
 			return nil, err
 		}
 		return ast.NewGroupingExpr(expr), nil
+	case p.match(token.WHILE):
+		return p.whileStatement()
 	case p.match(token.IF):
 		return p.ifStatement()
 	default:

@@ -69,3 +69,4 @@ func (a *AstPrinter) VisitAssignExpr(expr *ast.AssignExpr) (any, error)     { re
 func (a *AstPrinter) VisitLogicalExpr(expr *ast.LogicalExpr) (any, error)   { return nil, nil }
 func (a *AstPrinter) VisitBlockStmt(stmt *ast.BlockStmt) (any, error)       { return nil, nil }
 func (a *AstPrinter) VisitIfStmt(stmt *ast.IfStmt) (any, error)             { return nil, nil }
+func (a *AstPrinter) VisitWhileStmt(stmt *ast.WhileStmt) (any, error)       { return nil, nil }

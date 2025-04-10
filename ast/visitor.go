@@ -20,4 +20,5 @@ type IStmtVisitor interface {
 	VisitVarStmt(stmt *VarStmt) (any, error)
 	VisitBlockStmt(stmt *BlockStmt) (any, error)
 	VisitIfStmt(stmt *IfStmt) (any, error)
+	VisitWhileStmt(stmt *WhileStmt) (any, error)
 }

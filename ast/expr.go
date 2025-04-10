@@ -2,6 +2,30 @@ package ast
 
 import "github.com/Toolnado/sludge/token"
 
+type GroupingExpr struct {
+	Expession Expr
+}
+
+func NewGroupingExpr(Expession Expr) *GroupingExpr {
+	return &GroupingExpr{
+		Expession: Expession,
+	}
+}
+
+func (g *GroupingExpr) Accept(v IASTVisitor) (any, error) { return v.VisitGroupingExpr(g)}
+
+type VariableExpr struct {
+	Name token.Token
+}
+
+func NewVariableExpr(Name token.Token) *VariableExpr {
+	return &VariableExpr{
+		Name: Name,
+	}
+}
+
+func (va *VariableExpr) Accept(v IASTVisitor) (any, error) { return v.VisitVariableExpr(va)}
+
 type AssignExpr struct {
 	Name token.Token
 	Value Expr
@@ -73,28 +97,4 @@ func NewLiteralExpr(Value any) *LiteralExpr {
 }
 
 func (l *LiteralExpr) Accept(v IASTVisitor) (any, error) { return v.VisitLiteralExpr(l)}
-
-type GroupingExpr struct {
-	Expession Expr
-}
-
-func NewGroupingExpr(Expession Expr) *GroupingExpr {
-	return &GroupingExpr{
-		Expession: Expession,
-	}
-}
-
-func (g *GroupingExpr) Accept(v IASTVisitor) (any, error) { return v.VisitGroupingExpr(g)}
-
-type VariableExpr struct {
-	Name token.Token
-}
-
-func NewVariableExpr(Name token.Token) *VariableExpr {
-	return &VariableExpr{
-		Name: Name,
-	}
-}
-
-func (va *VariableExpr) Accept(v IASTVisitor) (any, error) { return v.VisitVariableExpr(va)}
 
