@@ -14,14 +14,21 @@ import (
 //                | statement ;
 
 // statement      → exprStmt ;
+// 				  | forStmt ;
 // 				  | ifStmt ;
 //                | printStmt ;
 // 				  | whileStmt ;
 //				  | block ;
 
+// forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+//                  expression? ";"
+//                  expression? ")" statement ;
+
 // whileStmt      → "while" "(" expression ")" statement ;
+
 // ifStmt         → "if" "(" expression ")" statement
 //                ( "else" statement )? ;
+
 // block          → "{" declaration* "}" ;
 
 // expression     → assignment ;
@@ -359,6 +366,77 @@ func (p *Parser) whileStatement() (ast.Stmt, error) {
 	return ast.NewWhileStmt(condition, body), nil
 }
 
+func (p *Parser) forStatement() (ast.Stmt, error) {
+	_, err := p.consume(token.LEFT_PAREN, "expect '(' after 'for'")
+	if err != nil {
+		return nil, err
+	}
+
+	var initializer ast.Stmt
+	if p.match(token.SEMICOLON) {
+		initializer = nil
+	} else if p.match(token.VAR, token.LET) {
+		i, err := p.varDeclaration()
+		if err != nil {
+			return nil, err
+		}
+		initializer = i
+	} else {
+		i, err := p.expressionStatement()
+		if err != nil {
+			return nil, err
+		}
+		initializer = i
+	}
+
+	var condition ast.Expr
+	if !p.check(token.SEMICOLON) {
+		c, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		condition = c
+	}
+
+	_, err = p.consume(token.SEMICOLON, "expect ';' after loop condition")
+	if err != nil {
+		return nil, err
+	}
+	var increment ast.Expr
+	if !p.check(token.RIGHT_PAREN) {
+		i, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		increment = i
+	}
+	_, err = p.consume(token.RIGHT_PAREN, "expect ';' after loop condition")
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	if increment != nil {
+		body = ast.NewBlockStmt([]ast.Stmt{body, ast.NewExprStmt(increment)})
+	}
+
+	if condition == nil {
+		condition = ast.NewLiteralExpr(true)
+	}
+	body = ast.NewWhileStmt(condition, body)
+
+	if initializer != nil {
+		body = ast.NewBlockStmt([]ast.Stmt{initializer, body})
+	}
+
+	return body, nil
+
+}
+
 // primary → literal | "(" expression ")" ;
 func (p *Parser) primary() (ast.Expr, error) {
 	switch {
@@ -389,6 +467,8 @@ func (p *Parser) primary() (ast.Expr, error) {
 		return ast.NewGroupingExpr(expr), nil
 	case p.match(token.WHILE):
 		return p.whileStatement()
+	case p.match(token.FOR):
+		return p.forStatement()
 	case p.match(token.IF):
 		return p.ifStatement()
 	default:

@@ -12,11 +12,14 @@ import (
 
 func main() {
 	l := lexer.New(strings.NewReader(`
-		var i = 0;
-		while (i < 10){
-			print i
-			i = i + 1
-		};
+		var a = 0;
+		var temp;
+
+		for (var b = 1; a < 10000; b = temp + b) {
+		print a;
+		temp = a;
+		a = b;
+		}
 	`))
 	t := l.ScanTokens()
 	p := parser.New(t)
@@ -28,6 +31,6 @@ func main() {
 	i := interpreter.New()
 	_, err = i.Interpret(stmts)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
