@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -16,10 +15,13 @@ func main() {
 		var temp;
 
 		for (var b = 1; a < 10000; b = temp + b) {
-		print a;
-		temp = a;
-		a = b;
+			print a;
+			temp = a;
+			a = b;
 		}
+
+		var time = clock()
+		print(time)
 	`))
 	t := l.ScanTokens()
 	p := parser.New(t)

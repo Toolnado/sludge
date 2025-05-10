@@ -5,18 +5,24 @@ import (
 
 	"github.com/Toolnado/sludge/ast"
 	"github.com/Toolnado/sludge/environment"
+	"github.com/Toolnado/sludge/syslib/time"
 	"github.com/Toolnado/sludge/token"
 )
 
 type Interpreter struct {
-	// hadRuntimeError bool
+	globals     *environment.Environment
 	environment *environment.Environment
 }
 
 func New() *Interpreter {
-	return &Interpreter{
-		environment: environment.New(nil),
+	base := environment.New(nil)
+	i := &Interpreter{
+		globals:     base,
+		environment: base,
 	}
+
+	i.globals.Define("clock", time.New())
+	return i
 }
 
 func (i *Interpreter) Interpret(stmts []ast.Stmt) (any, error) {
@@ -182,6 +188,36 @@ func (i *Interpreter) VisitBinaryExpr(expr *ast.BinaryExpr) (any, error) {
 	default:
 		return nil, NewError("unsupported binary operator", expr.Operator.Position)
 	}
+}
+
+func (i *Interpreter) VisitCallExpr(expr *ast.CallExpr) (any, error) {
+	callee, err := i.evaluate(expr.Callee)
+	if err != nil {
+		return nil, NewError(err.Error(), expr.Paren.Position)
+	}
+
+	args := make([]any, len(expr.Arguments))
+	for indx, item := range expr.Arguments {
+		result, err := i.evaluate(item)
+		if err != nil {
+			return nil, NewError(err.Error(), expr.Paren.Position)
+		}
+		args[indx] = result
+	}
+
+	function, ok := callee.(ast.Callable)
+	if !ok {
+		return nil, NewError("can only call functions and classes", expr.Paren.Position)
+	}
+
+	if len(args) != function.Arity() {
+		return nil, NewError(
+			fmt.Sprintf("expected %d arguments, but got %d", function.Arity(), len(args)),
+			expr.Paren.Position,
+		)
+	}
+
+	return function.Call(i, args), nil
 }
 
 func (i *Interpreter) VisitLogicalExpr(expr *ast.LogicalExpr) (any, error) {
