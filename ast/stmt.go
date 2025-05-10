@@ -2,20 +2,6 @@ package ast
 
 import "github.com/Toolnado/sludge/token"
 
-type WhileStmt struct {
-	Condition Expr
-	Body Stmt
-}
-
-func NewWhileStmt(Condition Expr, Body Stmt) *WhileStmt {
-	return &WhileStmt{
-		Condition: Condition,
-		Body: Body,
-	}
-}
-
-func (w *WhileStmt) Accept(v IASTVisitor) (any, error) { return v.VisitWhileStmt(w)}
-
 type PrintStmt struct {
 	Expession Expr
 }
@@ -81,4 +67,18 @@ func NewIfStmt(Condition Expr, ThenBranch Stmt, ElseBranch Stmt) *IfStmt {
 }
 
 func (i *IfStmt) Accept(v IASTVisitor) (any, error) { return v.VisitIfStmt(i)}
+
+type WhileStmt struct {
+	Condition Expr
+	Body Stmt
+}
+
+func NewWhileStmt(Condition Expr, Body Stmt) *WhileStmt {
+	return &WhileStmt{
+		Condition: Condition,
+		Body: Body,
+	}
+}
+
+func (w *WhileStmt) Accept(v IASTVisitor) (any, error) { return v.VisitWhileStmt(w)}
 

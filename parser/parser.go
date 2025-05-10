@@ -42,7 +42,9 @@ import (
 // term           → remainder ( ( "-" | "+" ) remainder )* ;
 // remainder      → factor ( "%" factor )* ;
 // factor         → unary ( ( "/" | "*" ) unary )* ;
-// unary          → ( "!" | "-" ) unary  | primary ;
+// unary          → ( "!" | "-" ) unary | call ;
+// call           → primary ( "(" arguments? ")" )* ;
+// arguments      → expression ( "," expression )* ;
 // primary        → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
 
 type Parser struct {
@@ -302,7 +304,45 @@ func (p *Parser) unary() (ast.Expr, error) {
 		}
 		return ast.NewUnaryExpr(operator, right), nil
 	}
-	return p.primary()
+	return p.call()
+}
+
+func (p *Parser) call() (ast.Expr, error) {
+	expr, err := p.primary()
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		if p.match(token.LEFT_PAREN) {
+			expr, err = p.finishCall(expr)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			break
+		}
+	}
+
+	return expr, nil
+}
+
+func (p *Parser) finishCall(callee ast.Expr) (ast.Expr, error) {
+	args := []ast.Expr{}
+	if !p.check(token.RIGHT_PAREN) {
+		for p.match(token.COMMA) {
+			expr, err := p.expression()
+			if err != nil {
+				return nil, err
+			}
+			args = append(args, expr)
+		}
+	}
+	paren, err := p.consume(token.RIGHT_PAREN, "expect ')' after arguments.")
+	if err != nil {
+		return nil, err
+	}
+	return ast.NewCallExpr(callee, paren, args), nil
 }
 
 func (p *Parser) block() ([]ast.Stmt, error) {

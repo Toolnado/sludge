@@ -96,6 +96,11 @@ func generateDefaultAST() {
 			"Operator token.Token",
 			"Right Expr",
 		},
+		"CallExpr": {
+			"Callee Expr",
+			"Paren token.Token",
+			"Arguments []Expr",
+		},
 	})
 
 	generateAST("stmt.go", map[string][]string{

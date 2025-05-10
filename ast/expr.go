@@ -2,6 +2,18 @@ package ast
 
 import "github.com/Toolnado/sludge/token"
 
+type LiteralExpr struct {
+	Value any
+}
+
+func NewLiteralExpr(Value any) *LiteralExpr {
+	return &LiteralExpr{
+		Value: Value,
+	}
+}
+
+func (l *LiteralExpr) Accept(v IASTVisitor) (any, error) { return v.VisitLiteralExpr(l)}
+
 type GroupingExpr struct {
 	Expession Expr
 }
@@ -56,6 +68,22 @@ func NewLogicalExpr(Left Expr, Operator token.Token, Right Expr) *LogicalExpr {
 
 func (l *LogicalExpr) Accept(v IASTVisitor) (any, error) { return v.VisitLogicalExpr(l)}
 
+type CallExpr struct {
+	Callee Expr
+	Paren token.Token
+	Arguments []Expr
+}
+
+func NewCallExpr(Callee Expr, Paren token.Token, Arguments []Expr) *CallExpr {
+	return &CallExpr{
+		Callee: Callee,
+		Paren: Paren,
+		Arguments: Arguments,
+	}
+}
+
+func (c *CallExpr) Accept(v IASTVisitor) (any, error) { return v.VisitCallExpr(c)}
+
 type BinaryExpr struct {
 	Left Expr
 	Operator token.Token
@@ -85,16 +113,4 @@ func NewUnaryExpr(Operator token.Token, Right Expr) *UnaryExpr {
 }
 
 func (u *UnaryExpr) Accept(v IASTVisitor) (any, error) { return v.VisitUnaryExpr(u)}
-
-type LiteralExpr struct {
-	Value any
-}
-
-func NewLiteralExpr(Value any) *LiteralExpr {
-	return &LiteralExpr{
-		Value: Value,
-	}
-}
-
-func (l *LiteralExpr) Accept(v IASTVisitor) (any, error) { return v.VisitLiteralExpr(l)}
 

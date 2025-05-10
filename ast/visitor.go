@@ -4,6 +4,7 @@ type IASTVisitor interface {
 	IExprVisitor
 	IStmtVisitor
 }
+
 type IExprVisitor interface {
 	VisitBinaryExpr(expr *BinaryExpr) (any, error)
 	VisitGroupingExpr(expr *GroupingExpr) (any, error)
@@ -12,6 +13,7 @@ type IExprVisitor interface {
 	VisitVariableExpr(expr *VariableExpr) (any, error)
 	VisitAssignExpr(expr *AssignExpr) (any, error)
 	VisitLogicalExpr(expr *LogicalExpr) (any, error)
+	VisitCallExpr(expr *CallExpr) (any, error)
 }
 
 type IStmtVisitor interface {

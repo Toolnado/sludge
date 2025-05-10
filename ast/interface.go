@@ -9,3 +9,8 @@ type Expr interface {
 type Stmt interface {
 	Expr
 }
+
+type Callable interface {
+	Call(interpreter IASTVisitor, arguments []any) any
+	Arity() int
+}
