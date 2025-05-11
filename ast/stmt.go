@@ -82,3 +82,19 @@ func NewWhileStmt(Condition Expr, Body Stmt) *WhileStmt {
 
 func (w *WhileStmt) Accept(v IASTVisitor) (any, error) { return v.VisitWhileStmt(w)}
 
+type FunctionStmt struct {
+	Name token.Token
+	Params []token.Token
+	Body []Stmt
+}
+
+func NewFunctionStmt(Name token.Token, Params []token.Token, Body []Stmt) *FunctionStmt {
+	return &FunctionStmt{
+		Name: Name,
+		Params: Params,
+		Body: Body,
+	}
+}
+
+func (f *FunctionStmt) Accept(v IASTVisitor) (any, error) { return v.VisitFunctionStmt(f)}
+

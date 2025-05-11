@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Toolnado/sludge/ast"
@@ -10,8 +11,12 @@ import (
 // Parser parses a sequence of tokens into an abstract syntax tree (AST).
 // It implements a recursive descent parser based on the following grammar:
 // program        → declaration* EOF ;
-// declaration    → varDecl
+// declaration    → funDecl
+// 				  | varDecl
 //                | statement ;
+
+// funDecl        → "fun" function ;
+// function       → IDENTIFIER "(" parameters? ")" block ;
 
 // statement      → exprStmt ;
 // 				  | forStmt ;
@@ -82,14 +87,56 @@ func (p *Parser) Parse() ([]ast.Stmt, error) {
 }
 
 func (p *Parser) declaration() (ast.Stmt, error) {
-	if p.match(token.VAR) {
+	switch {
+	case p.match(token.VAR):
 		return p.varDeclaration()
+	case p.match(token.FUNCTION):
+		return p.funDeclaration("function")
+	default:
+		return p.statement()
 	}
-	return p.statement()
+}
+
+func (p *Parser) funDeclaration(kind string) (ast.Stmt, error) {
+	name, err := p.consume(token.IDENTIFIER, fmt.Sprintf("expect %s name", kind))
+	if err != nil {
+		return nil, NewError(p.previous(), err.Error())
+	}
+	_, err = p.consume(token.LEFT_PAREN, fmt.Sprintf("expect '(' after %s name", kind))
+	if err != nil {
+		return nil, NewError(p.previous(), err.Error())
+	}
+	parameters := []token.Token{}
+	if !p.check(token.RIGHT_PAREN) {
+		for {
+			param, err := p.consume(token.IDENTIFIER, "expect parameter name")
+			if err != nil {
+				return nil, NewError(p.previous(), err.Error())
+			}
+			parameters = append(parameters, param)
+
+			if !p.match(token.COMMA) {
+				break
+			}
+		}
+	}
+	_, err = p.consume(token.RIGHT_PAREN, "expect ')' after parameters")
+	if err != nil {
+		return nil, NewError(p.previous(), err.Error())
+	}
+	_, err = p.consume(token.LEFT_BRACE, fmt.Sprintf("expect '{' before %s body", kind))
+	if err != nil {
+		return nil, NewError(p.previous(), err.Error())
+	}
+	body, err := p.block()
+	if err != nil {
+		return nil, NewError(p.previous(), err.Error())
+	}
+	return ast.NewFunctionStmt(name, parameters, body), nil
 }
 
 func (p *Parser) varDeclaration() (ast.Stmt, error) {
-	name, err := p.consume(token.IDENTIFIER, "expect variable name.")
+	name, err := p.consume(token.IDENTIFIER, "expect variable name")
 	if err != nil {
 		return nil, NewError(p.previous(), err.Error())
 	}
@@ -330,15 +377,19 @@ func (p *Parser) call() (ast.Expr, error) {
 func (p *Parser) finishCall(callee ast.Expr) (ast.Expr, error) {
 	args := []ast.Expr{}
 	if !p.check(token.RIGHT_PAREN) {
-		for p.match(token.COMMA) {
+		for {
 			expr, err := p.expression()
 			if err != nil {
 				return nil, err
 			}
 			args = append(args, expr)
+
+			if !p.match(token.COMMA) {
+				break
+			}
 		}
 	}
-	paren, err := p.consume(token.RIGHT_PAREN, "expect ')' after arguments.")
+	paren, err := p.consume(token.RIGHT_PAREN, "expect ')' after arguments")
 	if err != nil {
 		return nil, err
 	}

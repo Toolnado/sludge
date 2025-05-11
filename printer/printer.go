@@ -71,3 +71,4 @@ func (a *AstPrinter) VisitBlockStmt(stmt *ast.BlockStmt) (any, error)       { re
 func (a *AstPrinter) VisitIfStmt(stmt *ast.IfStmt) (any, error)             { return nil, nil }
 func (a *AstPrinter) VisitWhileStmt(stmt *ast.WhileStmt) (any, error)       { return nil, nil }
 func (i *AstPrinter) VisitCallExpr(expr *ast.CallExpr) (any, error)         { return nil, nil }
+func (i *AstPrinter) VisitFunctionStmt(expr *ast.FunctionStmt) (any, error) { return nil, nil }

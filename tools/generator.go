@@ -120,5 +120,10 @@ func generateDefaultAST() {
 			"Condition Expr",
 			"Body Stmt",
 		},
+		"FunctionStmt": {
+			"Name token.Token",
+			"Params []token.Token",
+			"Body []Stmt",
+		},
 	})
 }

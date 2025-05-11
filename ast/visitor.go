@@ -23,4 +23,5 @@ type IStmtVisitor interface {
 	VisitBlockStmt(stmt *BlockStmt) (any, error)
 	VisitIfStmt(stmt *IfStmt) (any, error)
 	VisitWhileStmt(stmt *WhileStmt) (any, error)
+	VisitFunctionStmt(stmt *FunctionStmt) (any, error)
 }

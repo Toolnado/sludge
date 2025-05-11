@@ -205,7 +205,7 @@ func (i *Interpreter) VisitCallExpr(expr *ast.CallExpr) (any, error) {
 		args[indx] = result
 	}
 
-	function, ok := callee.(ast.Callable)
+	function, ok := callee.(Callable)
 	if !ok {
 		return nil, NewError("can only call functions and classes", expr.Paren.Position)
 	}
@@ -237,4 +237,10 @@ func (i *Interpreter) VisitLogicalExpr(expr *ast.LogicalExpr) (any, error) {
 	}
 
 	return i.evaluate(expr.Right)
+}
+
+func (i *Interpreter) VisitFunctionStmt(stmt *ast.FunctionStmt) (any, error) {
+	fn := NewFunction(*stmt)
+	i.environment.Define(stmt.Name.Lexeme, fn)
+	return nil, nil
 }

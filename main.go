@@ -11,17 +11,11 @@ import (
 
 func main() {
 	l := lexer.New(strings.NewReader(`
-		var a = 0;
-		var temp;
-
-		for (var b = 1; a < 10000; b = temp + b) {
-			print a;
-			temp = a;
-			a = b;
+		function sayHi(first, last) {
+			print "Hi, " + first + " " + last + "!";
 		}
 
-		var time = clock()
-		print(time)
+		sayHi("Dear", "Reader");
 	`))
 	t := l.ScanTokens()
 	p := parser.New(t)
