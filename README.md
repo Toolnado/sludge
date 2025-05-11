@@ -1,10 +1,10 @@
 # Sludge
 
-Проект на Go.
+Golang Lox language interpreter
 
 ## Требования
 
-- Go 1.21 или выше
+- Go 1.21
 
 ## Установка
 
